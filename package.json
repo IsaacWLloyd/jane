@@ -17,7 +17,8 @@
 		"i18n:parse": "i18next --config i18next-parser.config.ts && prettier --write \"src/lib/i18n/**/*.{js,json}\"",
 		"cy:open": "cypress open",
 		"test:frontend": "vitest --passWithNoTests",
-		"pyodide:fetch": "node scripts/prepare-pyodide.js"
+		"pyodide:fetch": "node scripts/prepare-pyodide.js",
+		"start-video-server": "ts-node videoServer.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "3.2.2",
@@ -54,6 +55,8 @@
 		"@codemirror/theme-one-dark": "^6.1.2",
 		"@pyscript/core": "^0.4.32",
 		"@sveltejs/adapter-node": "^2.0.0",
+		"@types/express": "^5.0.0",
+		"@types/video.js": "^7.3.58",
 		"@xyflow/svelte": "^0.1.19",
 		"async": "^3.2.5",
 		"bits-ui": "^0.19.7",
@@ -62,6 +65,7 @@
 		"dayjs": "^1.11.10",
 		"dompurify": "^3.1.6",
 		"eventsource-parser": "^1.1.2",
+		"express": "^4.21.1",
 		"file-saver": "^2.0.5",
 		"fuse.js": "^7.0.0",
 		"highlight.js": "^11.9.0",
@@ -81,7 +85,8 @@
 		"svelte-sonner": "^0.3.19",
 		"tippy.js": "^6.3.7",
 		"turndown": "^7.2.0",
-		"uuid": "^9.0.1"
+		"uuid": "^9.0.1",
+		"video.js": "^8.18.1"
 	},
 	"engines": {
 		"node": ">=18.13.0 <=22.x.x",
