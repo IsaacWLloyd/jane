@@ -9,6 +9,7 @@
 	import { copyToClipboard, findWordIndices } from '$lib/utils';
 
 	import Message from './Messages/Message.svelte';
+	import VideoMessage from './Messages/VideoMessage.svelte';
 	import Loader from '../common/Loader.svelte';
 	import Spinner from '../common/Spinner.svelte';
 
@@ -143,8 +144,8 @@
 			let messageId =
 				history.messages[message.parentId].childrenIds[
 					Math.min(
-						history.messages[message.parentId].childrenIds.indexOf(message.id) + 1,
-						history.messages[message.parentId].childrenIds.length - 1
+						history.messages[message.parentId].childrenIdsindexOf(message.id) + 1,
+						history.messages[message.parntId].childrenIds.length - 1
 					)
 				];
 
@@ -370,46 +371,54 @@
 					{/if}
 
 					{#each messages as message, messageIdx (message.id)}
-						<Message
-							{chatId}
-							bind:history
-							messageId={message.id}
-							idx={messageIdx}
-							{user}
-							{showPreviousMessage}
-							{showNextMessage}
-							{editMessage}
-							{deleteMessage}
-							{rateMessage}
-							{regenerateResponse}
-							{continueResponse}
-							{mergeResponses}
-							{readOnly}
-							on:submit={async (e) => {
-								dispatch('submit', e.detail);
-							}}
-							on:action={async (e) => {
-								if (typeof e.detail === 'string') {
-									await chatActionHandler(chatId, e.detail, message.model, message.id);
-								} else {
-									const { id, event } = e.detail;
-									await chatActionHandler(chatId, id, message.model, message.id, event);
-								}
-							}}
-							on:update={() => {
-								updateChatHistory();
-							}}
-							on:scroll={() => {
-								if (autoScroll) {
-									const element = document.getElementById('messages-container');
-									autoScroll =
-										element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
-									setTimeout(() => {
-										scrollToBottom();
-									}, 100);
-								}
-							}}
-						/>
+						{#if message.type === 'video'}
+							<VideoMessage
+								videoId={message.videoId}
+								startTime={message.startTime}
+								endTime={message.endTime}
+							/>
+						{:else}
+							<Message
+								{chatId}
+								bind:history
+								messageId={message.id}
+								idx={messageIdx}
+								{user}
+								{showPreviousMessage}
+								{showNextMessage}
+								{editMessage}
+								{deleteMessage}
+								{rateMessage}
+								{regenerateResponse}
+								{continueResponse}
+								{mergeResponses}
+								{readOnly}
+								on:submit={async (e) => {
+									dispatch('submit', e.detail);
+								}}
+								on:action={async (e) => {
+									if (typeof e.detail === 'string') {
+										await chatActionHandler(chatId, e.detail, message.model, message.id);
+									} else {
+										const { id, event } = e.detail;
+										await chatActionHandler(chatId, id, message.model, message.id, event);
+									}
+								}}
+								on:update={() => {
+									updateChatHistory();
+								}}
+								on:scroll={() => {
+									if (autoScroll) {
+										const element = document.getElementById('messages-container');
+										autoScroll =
+											element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
+										setTimeout(() => {
+											scrollToBottom();
+										}, 100);
+									}
+								}}
+							/>
+						{/if}
 					{/each}
 				</div>
 				<div class="pb-12" />

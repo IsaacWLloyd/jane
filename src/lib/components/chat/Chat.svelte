@@ -68,6 +68,7 @@
 	import Banner from '../common/Banner.svelte';
 	import MessageInput from '$lib/components/chat/MessageInput.svelte';
 	import Messages from '$lib/components/chat/Messages.svelte';
+	import VideoMessage from '$lib/components/chat/Messages/VideoMessage.svelte';
 	import Navbar from '$lib/components/layout/Navbar.svelte';
 	import ChatControls from './ChatControls.svelte';
 	import EventConfirmDialog from '../common/ConfirmDialog.svelte';
@@ -78,6 +79,9 @@
 	let loaded = false;
 	const eventTarget = new EventTarget();
 	let controlPane;
+
+	//testing
+	let sendVideoResponses = true;
 
 	let stopResponseFlag = false;
 	let autoScroll = true;
@@ -753,12 +757,29 @@
 		}
 
 		let _responses: string[] = [];
-		// If modelId is provided, use it, else use selected model
 		let selectedModelIds = modelId
 			? [modelId]
 			: atSelectedModel !== undefined
 				? [atSelectedModel.id]
 				: selectedModels;
+
+		// Create video message
+		const videoMessageId = uuidv4();
+		const videoMessage = {
+			parentId: parentId,
+			id: videoMessageId,
+			childrenIds: [],
+			role: 'assistant',
+			type: 'video',
+			videoId: 'sampleVid.mp4',
+			startTime: '5',
+			endTime: null,
+			timestamp: Math.floor(Date.now() / 1000)
+		};
+
+		// Add video message to history
+		history.messages[videoMessageId] = videoMessage;
+		history.messages[parentId].childrenIds.push(videoMessageId);
 
 		// Create response messages for each selected model
 		const responseMessageIds: Record<PropertyKey, string> = {};
@@ -768,29 +789,24 @@
 			if (model) {
 				let responseMessageId = uuidv4();
 				let responseMessage = {
-					parentId: parentId,
-					id: responseMessageId,
-					childrenIds: [],
-					role: 'assistant',
-					content: '',
-					model: model.id,
-					modelName: model.name ?? model.id,
-					modelIdx: modelIdx ? modelIdx : _modelIdx,
-					userContext: null,
-					timestamp: Math.floor(Date.now() / 1000) // Unix epoch
+				parentId: videoMessageId, // Set parent to video message
+				id: responseMessageId,
+				childrenIds: [],
+				role: 'assistant',
+				content: '',
+				model: model.id,
+				modelName: model.name ?? model.id,
+				modelIdx: modelIdx ? modelIdx : _modelIdx,
+				userContext: null,
+				timestamp: Math.floor(Date.now() / 1000)
 				};
 
 				// Add message to history and Set currentId to messageId
 				history.messages[responseMessageId] = responseMessage;
 				history.currentId = responseMessageId;
 
-				// Append messageId to childrenIds of parent message
-				if (parentId !== null) {
-					history.messages[parentId].childrenIds = [
-						...history.messages[parentId].childrenIds,
-						responseMessageId
-					];
-				}
+				// Append messageId to childrenIds of video message
+				history.messages[videoMessageId].childrenIds.push(responseMessageId);
 
 				responseMessageIds[`${modelId}-${modelIdx ? modelIdx : _modelIdx}`] = responseMessageId;
 			}
@@ -2000,33 +2016,34 @@
 											// New user message
 											let userPrompt = e.detail.prompt;
 											let userMessageId = uuidv4();
-
+							
 											let userMessage = {
-												id: userMessageId,
-												parentId: e.detail.parentId,
-												childrenIds: [],
-												role: 'user',
-												content: userPrompt,
-												models: selectedModels
+													id: userMessageId,
+													parentId: e.detail.parentId,
+													childrenIds: [],
+													role: 'user',
+													content: userPrompt,
+													models: selectedModels,
+													type: 'text' // Add type field for user messages
 											};
-
+							
 											let messageParentId = e.detail.parentId;
-
+							
 											if (messageParentId !== null) {
-												history.messages[messageParentId].childrenIds = [
-													...history.messages[messageParentId].childrenIds,
-													userMessageId
-												];
+													history.messages[messageParentId].childrenIds = [
+														...history.messages[messageParentId].childrenIds,
+														userMessageId
+													];
 											}
-
+							
 											history.messages[userMessageId] = userMessage;
 											history.currentId = userMessageId;
-
+							
 											await tick();
 											await sendPrompt(userPrompt, userMessageId);
 										}
 									}}
-								/>
+						  		/>
 							</div>
 						</div>
 
