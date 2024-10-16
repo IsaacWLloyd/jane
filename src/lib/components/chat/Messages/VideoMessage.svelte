@@ -9,7 +9,7 @@
 <div class="video-message">
     <iframe
         src="{videoServerUrl}/video-embed?id={videoId}&start={startTime}{endTime ? `&end=${endTime}` : ''}"
-        width="712"
+        width="100%"
         height="400"
         frameborder="0"
         allowfullscreen
@@ -18,6 +18,11 @@
 
 <style>
     .video-message {
-        padding: 0px 128px;
+        margin: 0 342px;
+        max-width: 100%; /* Ensure it doesn't exceed the parent width */
+    }
+
+    iframe {
+        max-width: 100%; /* Ensure the iframe doesn't overflow its container */
     }
 </style>
